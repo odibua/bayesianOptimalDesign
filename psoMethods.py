@@ -80,6 +80,7 @@ class PSO():
         #Repeat the process of propagating the particles in solution space
         #and updating the local and global best states
         for t in range(numIters):
+            print("t",t)
             for j in range(numParticles): 
                 localBestState = copy.deepcopy(swarm[j].updateLocalBest());
                 globalBestState = fitnessEvaluationFunction(optimType.lower(),[],localBestState,globalBestState) 
@@ -110,7 +111,7 @@ class PSO():
     def executeNPSO(self,neighborSize,w,posMin,posMax,velMin,velMax,numIters,numParticles,particle,optimType,numEvalState,fitnessFunction,fitnessEvaluationFunction,npsoInterpFunc):
         #Initialize swarm, global best state, and boolean indicating if the global best has changed
         swarm=[];
-        globalBestState=[float("inf")]*numEvalState
+        globalBestState=[np.array(float("inf"))]*numEvalState
         newGlobalBool=0;        
         for j in range(numParticles):
                 swarm.append(particle(optimType,w,posMin,posMax,velMin,velMax,fitnessFunction,fitnessEvaluationFunction));             

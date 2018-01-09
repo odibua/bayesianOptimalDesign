@@ -110,6 +110,7 @@ class psoParticle():
         for k, item in enumerate(self.vel):
             r1=np.random.uniform(); r2=np.random.uniform();
             if np.isscalar(self.pos[k]):
+                #print("pos",self.pos,"localBest",self.localBestPos,"globalBest",posGlobalBest)
                 cognitiveVel = r1*c1*(self.localBestPos[k]  - self.pos[k]);
                 socialVel = r2*c2*(posGlobalBest[k] - self.pos[k]);
                 self.vel[k] = constrFactor*(w*self.vel[k] + cognitiveVel + socialVel);
