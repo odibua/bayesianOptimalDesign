@@ -34,26 +34,36 @@ from psoMethods import PSO
 from psoParticles import psoParticle
 from npsoInterpFuncs import npsoInterpFunc 
 from npsoParticles import npsoParticle 
-methodPSO
+methodString = ['PSO','GCPSO','NPSO'];
  
-forwardModelClass=testFuncClass().testFunction; 
+forwardModelClass=testFuncClass().testFunction; #Test model defined
+
+#Define prior
 thetaStart=0; thetaEnd=1.0
 lb=np.array([thetaStart]); ub=np.array([thetaEnd]);
-nSamples=int(1e2); nSimultaneous=1; designDimension=1;
+nSamples=int(1e2); 
 genPriorSamples = priorUniform(lb,ub);
+
+#Define design parameter dimensions and its boundaries
+nSimultaneous=1; designDimension=1; dLB=0; dUB=1.0
+
+#Define distribution for the noise to be added to model
 variance=(1e-4);
 mu=[0]*nSimultaneous; cov = [[0]*nSimultaneous for j in xrange(nSimultaneous)]; 
 for j in xrange(nSimultaneous):
     cov[j][j]=variance 
-distribution=multivariate_normal(mu,cov)
+distribution=multivariate_normal(mu,cov) 
+
+#Define Utility function that take design parameters as arguments after passing in 
 KL = KLUtility(forwardModelClass,distribution,genPriorSamples,nSamples,nSimultaneous,designDimension)
 #d=np.array([0.8,1.0])
 #U=KL(d)
 #print(U)
 
+#Particle Swarm Optimization on Utility function
 ##Define bounds 
-posMin = np.array([0.0]*nSimultaneous);
-posMax = np.array([1.0]*nSimultaneous);
+posMin = np.array(np.array([dLB]*designDimension)*nSimultaneous);
+posMax = np.array(np.array([dUB]*designDimension)*nSimultaneous);
 velMin = posMin;
 velMax = posMax;
 #Define PSO Parameters
