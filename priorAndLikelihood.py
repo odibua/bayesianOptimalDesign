@@ -14,6 +14,7 @@ from scipy.stats import multivariate_normal
 def priorUniform(lb,ub):
     def generateSamples(n):        
         #lb = np.array(lb); ub=np.array(ub);
+        #uniformSamples=np.random.uniform(lb,ub,n);#lhs(len(lb),samples=n);
         uniformSamples=lhs(len(lb),samples=n);
         theta = [(ub-lb)*uniformSamples[j]+lb for j in range(len(uniformSamples))]        
         return theta

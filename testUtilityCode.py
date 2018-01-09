@@ -10,10 +10,16 @@ outlined in the psoMethods file. The function tested is based on the first two e
 and the correct results for the optimal design points are:
     Given:
         designDimension=1, nSimultaneous=1, thetaStart=0 thetaEnd=1.0, dOpt = 1.0 and U = 3.36
+        designDimension=1, nSimultaneous=1, thetaStart=0 thetaEnd=0.4373, dOpt = 0.2 and U = 2.4
+        designDimension=1, nSimultaneous=1, thetaStart=0.4373 thetaEnd=1.0, dOpt = 1.0 and U = 3.3
         designDimension=1, nSimultaneous=2, thetaStart=0 thetaEnd=1.0, dOpt = (0.2,1.0) or (1.0,0.2) and U=3.7
-        designDimension=1, nSimultaneous=2, thetaStart=0 thetaEnd=0.4373, dOpt = (0.2,0.2) and U=2.7
+        designDimension=1, nSimultaneous=2, thetaStart=0 thetaEnd=0.4373, dOpt = (0.2,0.2) and U=2.8
         designDimension=1, nSimultaneous=2, thetaStart=0.4373 thetaEnd=1.0, dOpt = (1.0,1.0) and U=3.6
+        
+Currently the number of samples is only 100. To get closer to the true results, 
+it is necessary to increase the number of samples. The type of PSO used also has an impact on the correctness of solutions
 """
+import sys
 import copy
 import random
 import numpy as np
@@ -22,8 +28,6 @@ from utilityFunc import KLUtility
 from utilityFunc import evaluateFitnessFunctions
 
 from priorAndLikelihood import priorUniform
-from priorAndLikelihood import combDriveMeas
-from priorAndLikelihood import testFunctionMeas
 
 from combDriveModel import testFuncClass
 
@@ -35,17 +39,30 @@ from psoParticles import psoParticle
 from npsoInterpFuncs import npsoInterpFunc 
 from npsoParticles import npsoParticle 
 methodString = ['PSO','GCPSO','NPSO'];
+#methodUse=methodString[1]
+methodUse=sys.argv[1]; thetaMin = float(sys.argv[2]); thetaMax = float(sys.argv[3]); nSamples=int(sys.argv[4])
+
+if (methodUse not in methodString):
+    sys.exit('PSO method does not exist. Input PSO,GCPSO,or NPSO')
+elif (thetaMax < thetaMin or thetaMax>1 or thetaMin<0):
+    sys.exit('Invalid paramter bounds, input bounds between 0 and 1')
+elif (nSamples<=0):
+     sys.exit('Invalid paramter bounds, input bounds between 0 and 1')
+    
+
+
+#Define prior
+#thetaMin=0; thetaMax=0.4373
+lb=np.array([thetaMin]); ub=np.array([thetaMax]);
+#nSamples=int(1e2); 
+genPriorSamples = priorUniform(lb,ub);
  
 forwardModelClass=testFuncClass().testFunction; #Test model defined
 
-#Define prior
-thetaStart=0; thetaEnd=1.0
-lb=np.array([thetaStart]); ub=np.array([thetaEnd]);
-nSamples=int(1e2); 
-genPriorSamples = priorUniform(lb,ub);
+
 
 #Define design parameter dimensions and its boundaries
-nSimultaneous=1; designDimension=1; dLB=0; dUB=1.0
+nSimultaneous=2; designDimension=1; dLB=0; dUB=1.0
 
 #Define distribution for the noise to be added to model
 variance=(1e-4);
@@ -56,14 +73,14 @@ distribution=multivariate_normal(mu,cov)
 
 #Define Utility function that take design parameters as arguments after passing in 
 KL = KLUtility(forwardModelClass,distribution,genPriorSamples,nSamples,nSimultaneous,designDimension)
-#d=np.array([0.8,1.0])
+#d=np.array([0.2,0.2])
 #U=KL(d)
 #print(U)
-
+#sys.exit()
 #Particle Swarm Optimization on Utility function
 ##Define bounds 
-posMin = np.array(np.array([dLB]*designDimension)*nSimultaneous);
-posMax = np.array(np.array([dUB]*designDimension)*nSimultaneous);
+posMin = np.array([np.array([dLB]*designDimension)]*nSimultaneous);
+posMax = np.array([np.array([dUB]*designDimension)]*nSimultaneous);
 velMin = posMin;
 velMax = posMax;
 #Define PSO Parameters
@@ -84,13 +101,13 @@ optimType='Max';
 pso=PSO();
 
 #Execute standard PSO
-if (methodPSO=='PSO'):
+if (methodUse=='PSO'):
     output=pso.executePSO(c1,c2,w,posMin,posMax,velMin,velMax,numIters,numParticles,psoParticle,optimType,numEvalState,KL,evaluateFitnessFunctions)
-elif (methodPSO=='GCPSO'):
+elif (methodUse=='GCPSO'):
     #Execute constrict PSO
     c1=2.05; c2=c1;
-    output=pso.executeGCPSO(constrict,c1,c2,w,posMin,posMax,velMin,velMax,numIters,numParticles,psoParticle,optimType,numEvalState,funcUsed,evaluateFitnessFunctions)
-elif (methodPSO=='NPSO'):
+    output=pso.executeGCPSO(constrict,c1,c2,w,posMin,posMax,velMin,velMax,numIters,numParticles,psoParticle,optimType,numEvalState,KL,evaluateFitnessFunctions)
+elif (methodUse=='NPSO'):
     #Execute NPSO
-    output=pso.executeNPSO(neighborSize,w,posMin,posMax,velMin,velMax,numIters,numParticles,npsoParticle,optimType,numEvalState,funcUsed,evaluateFitnessFunctions,npsoInterpFunc)
+    output=pso.executeNPSO(neighborSize,w,posMin,posMax,velMin,velMax,numIters,numParticles,npsoParticle,optimType,numEvalState,KL,evaluateFitnessFunctions,npsoInterpFunc)
 
