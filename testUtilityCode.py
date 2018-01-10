@@ -41,14 +41,18 @@ from npsoParticles import npsoParticle
 methodString = ['PSO','GCPSO','NPSO'];
 #methodUse=methodString[1]
 methodUse=sys.argv[1]; thetaMin = float(sys.argv[2]); thetaMax = float(sys.argv[3]); nSamples=int(sys.argv[4])
+nSimultaneous = int(sys.argv[5]); designDimension = int(sys.argv[6]);
 
 if (methodUse not in methodString):
     sys.exit('PSO method does not exist. Input PSO,GCPSO,or NPSO')
 elif (thetaMax < thetaMin or thetaMax>1 or thetaMin<0):
     sys.exit('Invalid paramter bounds, input bounds between 0 and 1')
 elif (nSamples<=0):
-     sys.exit('Invalid paramter bounds, input bounds between 0 and 1')
-    
+    sys.exit('Invalid number of samples. Make samples greater than 0')
+elif (nSimultaneous>2 or nSimultaneous<0):
+    sys.exit('Invalid number of simultaneous experiments. Must be either 1 or 2')
+elif (designDimension>1 or designDimension<0):
+    sys.exit('Invalid number of dimensions. Must be 1')
 
 
 #Define prior
@@ -62,7 +66,8 @@ forwardModelClass=testFuncClass().testFunction; #Test model defined
 
 
 #Define design parameter dimensions and its boundaries
-nSimultaneous=2; designDimension=1; dLB=0; dUB=1.0
+#nSimultaneous=2; designDimension=1; 
+dLB=0; dUB=1.0
 
 #Define distribution for the noise to be added to model
 variance=(1e-4);
@@ -78,6 +83,7 @@ KL = KLUtility(forwardModelClass,distribution,genPriorSamples,nSamples,nSimultan
 #print(U)
 #sys.exit()
 #Particle Swarm Optimization on Utility function
+
 ##Define bounds 
 posMin = np.array([np.array([dLB]*designDimension)]*nSimultaneous);
 posMax = np.array([np.array([dUB]*designDimension)]*nSimultaneous);
@@ -111,3 +117,4 @@ elif (methodUse=='NPSO'):
     #Execute NPSO
     output=pso.executeNPSO(neighborSize,w,posMin,posMax,velMin,velMax,numIters,numParticles,npsoParticle,optimType,numEvalState,KL,evaluateFitnessFunctions,npsoInterpFunc)
 
+print('Optimal Fitness is',output[1][0],'at design point',output[1][1]);
