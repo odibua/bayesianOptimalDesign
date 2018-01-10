@@ -17,6 +17,7 @@ The ability of the code to converge is heavily dependent on how uniformly distri
 The testUtilityFunction contains code that allows the testing of this, and the comments in that file yield the solutions that one should expect from testing this. The test can be run from the python command line argument with the following inputs
 
     methodUse=sys.argv[1]; thetaMin = float(sys.argv[2]); thetaMax = float(sys.argv[3]); nSamples=int(sys.argv[4])
+    nSimultaneous = int(sys.argv[5]); designDimension = int(sys.argv[6]);
 
 The valid range for theta is between 0 and 1, and the valid strings for methodUse (which refers to PSO optimization) is in 
 the string
